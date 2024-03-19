@@ -1,0 +1,200 @@
+package hayvanatBahcesiApp;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+public class Hayvan {
+
+	public int x;
+	public int y;
+	private int toplamAdim;
+	public String cinsiyet;
+	public int ciftlesmeDurum = 0;
+
+	public int sayac = 0;
+	static Random random = new Random();
+	static Hayvan[][] hb = new Hayvan[50][50];
+	static List<Hayvan> hayvanlar = new ArrayList<>();
+
+	public Hayvan() {
+	}
+
+	public static int xkoordinatBelirle() {
+		int x = 0;
+		x = random.nextInt(50);
+		return x;
+	}
+
+	public static int ykoordinatBelirle() {
+		int y = 0;
+		y = random.nextInt(50);
+		return y;
+	}
+
+	// matris icine hayvanlari ekle (baslangic icin)
+	public <T extends Hayvan> void hayvanEkle(int adet, String cinsiyet, int adim, Class<T> hayvanTuru,
+			int ciftlesmeDurum) {
+		for (int i = 0; i < adet; i++) {
+			// -------(x,y) noktasina eklenen hayvan var mi-----
+			// varsa yeniden x, y degeri olustur
+			int x = xkoordinatBelirle();
+			int y = ykoordinatBelirle();
+
+			while (hb[x][y] != null) {
+				x = xkoordinatBelirle();
+				y = ykoordinatBelirle();
+			}
+			// ------- /(x,y) noktasina eklenen hayvan var mi-----
+
+			// -------(x,y) noktasina hayvani ekle-----
+			try {
+				T hayvan = hayvanTuru.getConstructor(int.class, int.class, String.class, int.class, int.class)
+						.newInstance(x, y, cinsiyet, adim, 0);
+				hayvanlar.add(hayvan);
+				hb[x][y] = hayvan;
+				hayvan.setX(x);
+				hayvan.setY(y);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			// ------- /(x,y) noktasina hayvani ekle-----
+		}
+		/*
+		 * // Matrisi yazdir for (int i = 0; i < hb.length; i++) { for (int j = 0; j <
+		 * hb[i].length; j++) { if (hb[i][j] != null) {
+		 * System.out.print(hb[i][j].getClass().getSimpleName() + " "); } else {
+		 * System.out.print("null "); } } System.out.println(); }
+		 * System.out.println(hayvanlar.size());
+		 */
+	}
+
+	public void hareketEttir() {
+		int sayac2 = 0;
+		int adim = 0;
+		int yeniDogan = 0;
+		int olen = 0;
+		//sayac2 yerine toplamAdim kullanilmali. 1000 oldugunda donguden cikmali.
+		while (sayac2 < 1000) {
+			for (Hayvan hayvan : hayvanlar) {
+				adim = hayvan.getToplamAdim(); // her harekette kac birim ilerleyecegi oldugunu varsayiyorum?
+				hayvan.hareketEt();
+				yeniDogan += ciftles(hayvanlar, hayvan);
+				if (hayvan instanceof Kurt || hayvan instanceof Aslan) {
+					olen += saldir(hayvanlar, hayvan);
+				}
+				toplamAdim+=adim;
+			}
+			sayac2++;
+		}
+		System.out.println("yeniDogan: " + yeniDogan);
+		System.out.println("olen: " + olen);
+	}
+
+	public int ciftles(List<Hayvan> hayvanlar, Hayvan mevcuthayvan) {
+		int yeni = 0;
+		for (Hayvan h : hayvanlar) {
+			if (h.getClass() == mevcuthayvan.getClass() && h.getCiftlesmeDurum() == 0
+					&& mevcuthayvan.getCiftlesmeDurum() == 0) {
+				int mesafe = (int) Math.round(Math.sqrt(
+						Math.pow((h.getX() - mevcuthayvan.getX()), 2) + Math.pow((h.getY() - mevcuthayvan.getY()), 2)));
+				if ((h.getCinsiyet() != mevcuthayvan.getCinsiyet())) {
+					if (mesafe <= 3) { 
+						System.out.println(this.getClass().getSimpleName() + " dogdu");
+						// -----------------
+						mevcuthayvan.setCiftlesmeDurum(1);
+						h.setCiftlesmeDurum(1);
+						yeni++;
+					}
+				}
+			}
+		}
+		return yeni;
+	}
+
+	public int saldir(List<Hayvan> hayvanlar, Hayvan mevcutHayvan) {
+		int olen = 0;
+		for (Hayvan hayvan : hayvanlar) {
+			if (mevcutHayvan instanceof Kurt) {
+				if (hayvan instanceof Koyun || hayvan instanceof Tavuk || hayvanlar instanceof Horoz) {
+					int mesafe = (int) Math.round(Math.sqrt(Math.pow((hayvan.getX() - mevcutHayvan.getX()), 2)
+							+ Math.pow((hayvan.getY() - mevcutHayvan.getY()), 2)));
+					if (mesafe <= 4) {
+						System.out.println("Kurt, " + hayvan.getClass().getSimpleName() + " avladı!");
+						olen++;
+					}
+				}
+			} else if (mevcutHayvan instanceof Aslan) {
+				if (hayvan instanceof Koyun || hayvanlar instanceof Inek) {
+					int mesafe = (int) Math.round(Math.sqrt(Math.pow((hayvan.getX() - mevcutHayvan.getX()), 2)
+							+ Math.pow((hayvan.getY() - mevcutHayvan.getY()), 2)));
+					if (mesafe <= 5) {
+						System.out.println("Kurt, " + hayvan.getClass().getName() + " avladı!");
+						olen++;
+					}
+				}
+			}
+		}
+		return olen;
+	}
+
+	public Hayvan(int x, int y, String cinsiyet, int toplamAdim, int ciftlesmeDurum) {
+		super();
+		this.x = x;
+		this.y = y;
+		this.cinsiyet = cinsiyet;
+		this.toplamAdim = toplamAdim;
+		this.ciftlesmeDurum = ciftlesmeDurum;
+	}
+
+	public int getX() {
+		return x;
+	}
+
+	public void setX(int x) {
+		this.x = x;
+	}
+
+	public int getY() {
+		return y;
+	}
+
+	public void setY(int y) {
+		this.y = y;
+	}
+
+	public String getCinsiyet() {
+		return cinsiyet;
+	}
+
+	public void setCinsiyet(String cinsiyet) {
+		this.cinsiyet = cinsiyet;
+	}
+
+	public int getToplamAdim() {
+		return toplamAdim;
+	}
+
+	public void setToplamAdim(int toplamAdim) {
+		this.toplamAdim = toplamAdim;
+	}
+
+	public int getCiftlesmeDurum() {
+		return ciftlesmeDurum;
+	}
+
+	public void setCiftlesmeDurum(int ciftlesmeDurum) {
+		this.ciftlesmeDurum = ciftlesmeDurum;
+	}
+
+	/*
+	 * public void saldir(List<Hayvan> hayvanlar, Hayvan hayvan) { }
+	 */
+
+	/*
+	 * public void ciftles(List<Hayvan> hayvanlar, Hayvan hayvan) { }
+	 */
+
+	void hareketEt() {
+	}
+}
