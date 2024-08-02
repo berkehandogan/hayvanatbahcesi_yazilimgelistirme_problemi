@@ -7,7 +7,7 @@ public class Main {
 	public static Avci avci;
 
 	public static void main(String[] args) {
-
+//commend line
 		Hayvan h = new Hayvan();
         h.hayvanEkle(5, "Dişi", 3, Kurt.class, 0);
         h.hayvanEkle(5, "Erkek", 3, Kurt.class, 0);
